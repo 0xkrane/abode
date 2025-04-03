@@ -80,12 +80,12 @@ def load_styles():
         st.error(f"Error loading styles: {e}")
         return []
 
-def select_random_images(styles, num_images=5):
+def select_random_images(styles, num_images=20):
     """Select random images from different styles"""
     all_images = []
     style_info = {}  # To track which style each image belongs to
     
-    # Get up to 2 images from each style until we have enough
+    # Get up to 3 images from each style until we have enough
     random.shuffle(styles)
     for style in styles:
         if len(all_images) >= num_images:
@@ -93,9 +93,9 @@ def select_random_images(styles, num_images=5):
             
         style_images = style["image_paths"]
         if style_images:
-            # Shuffle and select up to 2 random images from this style
+            # Shuffle and select up to 3 random images from this style
             random.shuffle(style_images)
-            selected = style_images[:min(2, len(style_images))]
+            selected = style_images[:min(3, len(style_images))]
             
             for img in selected:
                 if len(all_images) < num_images:
@@ -378,6 +378,13 @@ def main():
                 # Progress indicator
                 st.progress(st.session_state.current_index / len(st.session_state.random_images))
                 st.caption(f"Image {st.session_state.current_index + 1} of {len(st.session_state.random_images)}")
+                
+                # Add a counter for liked/disliked images
+                likes_count = len(st.session_state.liked_images)
+                dislikes_count = len(st.session_state.disliked_images)
+                remaining = len(st.session_state.random_images) - st.session_state.current_index
+                st.caption(f"Liked: {likes_count} | Disliked: {dislikes_count} | Remaining: {remaining}")
+                
             else:
                 st.success("You've reviewed all the example rooms!")
                 
