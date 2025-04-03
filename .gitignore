@@ -16,14 +16,6 @@ poetry.lock
 
 # Project specific - ignore images but keep directories and descriptions
 # Keep description.txt files but exclude other .txt files
-room_styles/**/*.txt
-!room_styles/**/description.txt
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.bmp
-*.txt.meta
 
 # Distribution / packaging
 .Python
