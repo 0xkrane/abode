@@ -23,9 +23,9 @@ load_dotenv()
 # Constants
 BASE_DIR = Path("room_styles")
 STYLES_FILE = BASE_DIR / "styles.json"
-IMAGES_PER_STYLE = 70
+IMAGES_PER_STYLE = 150  # Increased from 70 to 150 images per style
 MIN_IMAGE_SIZE = 400  # Minimum width/height in pixels
-PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
+PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")  # Get from https://www.pexels.com/api/
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 class StyleDownloader:
@@ -223,12 +223,12 @@ class StyleDownloader:
                 except Exception as e:
                     logger.error(f"Error creating description file for {style_name}: {e}")
             
-            if image_files:
-                styles_with_images.append(style)
-            else:
-                styles_without_images.append(style)
+            # Always add styles to the "without images" list to download more
+            # This forces the script to download more images for all styles
+            logger.info(f"Already have {len(image_files)} images for {style_name}, but will download more")
+            styles_without_images.append(style)
         
-        return existing_styles, styles_with_images, styles_without_images
+        return existing_styles, [], styles_without_images
     
     def download_pexels_images(self, style, max_images=IMAGES_PER_STYLE):
         """Download images from Pexels API for a specific style"""
@@ -239,6 +239,22 @@ class StyleDownloader:
             return 0
             
         style_dir = BASE_DIR / style_name.replace(" ", "_").lower()
+        
+        # Get existing images to avoid duplicates
+        existing_images = set()
+        for img_path in style.get('image_paths', []):
+            # Extract the photo ID from the filename if it exists
+            filename = os.path.basename(img_path)
+            if '_' in filename:
+                try:
+                    # Try to extract the photo ID which would be after the last underscore
+                    # and before the file extension
+                    photo_id = filename.split('_')[-1].split('.')[0]
+                    existing_images.add(photo_id)
+                except:
+                    pass
+        
+        logger.info(f"Found {len(existing_images)} existing images for {style_name}")
         
         # Use all search keywords to get diverse images
         images_per_keyword = max_images // len(search_keywords)
@@ -272,91 +288,124 @@ class StyleDownloader:
                 f"{keyword} interior design {style_name}"
             ]
             
+            keyword_downloaded = 0
+            
             for search_query in search_queries:
-                if total_downloaded >= images_per_keyword:
+                if keyword_downloaded >= images_per_keyword:
                     break
                     
                 encoded_query = search_query.replace(" ", "%20")
                 
                 logger.info(f"Searching Pexels for '{search_query}'")
                 
-                # Make API request to Pexels
-                pexels_url = f"https://api.pexels.com/v1/search?query={encoded_query}&per_page=30&orientation=landscape"
-                try:
-                    response = self.session.get(pexels_url)
+                # Implement pagination to get more images
+                page = 1
+                per_page = 80  # Maximum allowed by Pexels API
+                
+                while keyword_downloaded < images_per_keyword and page <= 5:  # Limit to 5 pages to avoid excessive requests
+                    logger.info(f"Fetching page {page} of results for '{search_query}'")
                     
-                    if response.status_code != 200:
-                        logger.error(f"Pexels API error: {response.status_code} - {response.text}")
-                        continue
-                    
-                    data = response.json()
-                    photos = data.get("photos", [])
-                    
-                    # Show more details about the API response
-                    total_results = data.get("total_results", 0)
-                    logger.info(f"Pexels found {total_results} total results, returned {len(photos)} photos")
-                    
-                    if not photos:
-                        logger.warning(f"No photos found for '{search_query}'")
-                        continue
-                    
-                    # Shuffle to get a good mix
-                    random.shuffle(photos)
-                    
-                    # Limit to remaining images per keyword
-                    remaining = images_per_keyword - total_downloaded
-                    photos = photos[:remaining]
-                    
-                    # Download images
-                    for i, photo in enumerate(photos):
-                        if total_downloaded >= max_images:
+                    # Make API request to Pexels with pagination
+                    pexels_url = f"https://api.pexels.com/v1/search?query={encoded_query}&per_page={per_page}&page={page}&orientation=landscape"
+                    try:
+                        response = self.session.get(pexels_url)
+                        
+                        if response.status_code != 200:
+                            logger.error(f"Pexels API error: {response.status_code} - {response.text}")
                             break
                         
-                        try:
-                            # Get the large size image URL
-                            image_url = photo["src"]["large"]
-                            photographer = photo.get("photographer", "Unknown")
+                        data = response.json()
+                        photos = data.get("photos", [])
+                        
+                        # Show more details about the API response
+                        total_results = data.get("total_results", 0)
+                        logger.info(f"Pexels found {total_results} total results, returned {len(photos)} photos on page {page}")
+                        
+                        if not photos:
+                            logger.warning(f"No photos found for '{search_query}' on page {page}")
+                            break
+                        
+                        # Shuffle to get a good mix
+                        random.shuffle(photos)
+                        
+                        # Download images
+                        for i, photo in enumerate(photos):
+                            if keyword_downloaded >= images_per_keyword or total_downloaded >= max_images:
+                                break
                             
-                            logger.info(f"Downloading from Pexels: {image_url} (by {photographer})")
-                            img_response = self.session.get(image_url, stream=True)
+                            try:
+                                # Get the photo ID and check if we already have this image
+                                photo_id = str(photo.get("id", "unknown"))
+                                
+                                # Skip if we already have this image
+                                if photo_id in existing_images:
+                                    logger.debug(f"Skipping already downloaded image: {photo_id}")
+                                    continue
+                                
+                                # Get the large size image URL
+                                image_url = photo["src"]["large"]
+                                photographer = photo.get("photographer", "Unknown")
+                                
+                                logger.info(f"Downloading from Pexels: {image_url} (by {photographer})")
+                                img_response = self.session.get(image_url, stream=True)
+                                
+                                if img_response.status_code == 200:
+                                    # Process and save the image
+                                    img = Image.open(BytesIO(img_response.content))
+                                    
+                                    # Get image dimensions
+                                    width, height = img.size
+                                    logger.debug(f"Image dimensions: {width}x{height}")
+                                    
+                                    # Only save if it's large enough
+                                    if width >= MIN_IMAGE_SIZE and height >= MIN_IMAGE_SIZE:
+                                        # Save image info in filename for attribution
+                                        img_path = style_dir / f"{keyword.replace(' ', '_')}_{photo_id}.jpg"
+                                        
+                                        # Double-check if the file exists (in case of naming variations)
+                                        if not img_path.exists():
+                                            img.save(img_path)
+                                            # Add to our set of existing images to avoid duplicates in this run
+                                            existing_images.add(photo_id)
+                                            total_downloaded += 1
+                                            keyword_downloaded += 1
+                                            
+                                            # Create a metadata file with attribution information
+                                            meta_path = style_dir / f"{keyword.replace(' ', '_')}_{photo_id}.txt"
+                                            with open(meta_path, "w") as f:
+                                                f.write(f"Photo by: {photographer}\n")
+                                                f.write(f"Source: Pexels (ID: {photo_id})\n")
+                                                f.write(f"URL: {photo.get('url', 'Unknown')}\n")
+                                                f.write(f"Size: {width}x{height}\n")
+                                            
+                                            logger.info(f"Downloaded Pexels image #{total_downloaded} for '{keyword}'")
+                                        else:
+                                            logger.debug(f"Image already exists: {img_path}")
+                                    else:
+                                        logger.debug(f"Image too small: {width}x{height}")
+                            except Exception as e:
+                                logger.error(f"Error downloading image from Pexels: {e}")
+                                # Continue with next image
+                        
+                        # Check if we need to move to the next page
+                        if keyword_downloaded < images_per_keyword and "next_page" in data and data["next_page"]:
+                            page += 1
+                            # Add a small delay to avoid API rate limits
+                            time.sleep(1.5)
+                        else:
+                            break
                             
-                            if img_response.status_code == 200:
-                                # Process and save the image
-                                img = Image.open(BytesIO(img_response.content))
-                                
-                                # Get image dimensions
-                                width, height = img.size
-                                logger.debug(f"Image dimensions: {width}x{height}")
-                                
-                                # Only save if it's large enough
-                                if width >= MIN_IMAGE_SIZE and height >= MIN_IMAGE_SIZE:
-                                    # Save image info in filename for attribution
-                                    photo_id = photo.get("id", "unknown")
-                                    img_path = style_dir / f"{keyword.replace(' ', '_')}_{photo_id}.jpg"
-                                    img.save(img_path)
-                                    total_downloaded += 1
-                                    
-                                    # Create a metadata file with attribution information
-                                    meta_path = style_dir / f"{keyword.replace(' ', '_')}_{photo_id}.txt"
-                                    with open(meta_path, "w") as f:
-                                        f.write(f"Photo by: {photographer}\n")
-                                        f.write(f"Source: Pexels (ID: {photo_id})\n")
-                                        f.write(f"URL: {photo.get('url', 'Unknown')}\n")
-                                        f.write(f"Size: {width}x{height}\n")
-                                    
-                                    logger.info(f"Downloaded Pexels image #{total_downloaded} for '{keyword}'")
-                                else:
-                                    logger.debug(f"Image too small: {width}x{height}")
-                        except Exception as e:
-                            logger.error(f"Error downloading image from Pexels: {e}")
-                    
-                    # If we got some images, move to the next keyword
-                    if total_downloaded > 0:
+                    except Exception as e:
+                        logger.error(f"Error searching Pexels: {e}")
                         break
-                            
-                except Exception as e:
-                    logger.error(f"Error searching Pexels: {e}")
-                    
+                
+                # Add a small delay between keywords to be nice to the API
+                time.sleep(2)
+            
+            # If we got enough images from this search query, break the loop
+            if keyword_downloaded >= images_per_keyword:
+                break
+                
         if total_downloaded == 0:
             logger.warning(f"Couldn't download any images from Pexels for {style_name}.")
             
@@ -370,18 +419,19 @@ class StyleDownloader:
             
             # If we have styles with images, report them
             if styles_with_images:
-                logger.info(f"Found {len(styles_with_images)} styles with images:")
+                logger.info(f"Found {len(styles_with_images)} styles with images (these won't be modified):")
                 for style in styles_with_images:
                     logger.info(f"  - {style['name']} ({len(style['image_paths'])} images)")
             
             # If we have styles without images, prepare to download images
             if styles_without_images:
-                logger.info(f"\nFound {len(styles_without_images)} styles without images:")
+                logger.info(f"\nFound {len(styles_without_images)} styles to add more images to:")
                 for style in styles_without_images:
-                    logger.info(f"  - {style['name']}")
+                    image_count = len(style.get('image_paths', []))
+                    logger.info(f"  - {style['name']} (current: {image_count} images)")
                 
                 styles_to_download = styles_without_images
-                logger.info("\nWill download images for the above styles.")
+                logger.info("\nWill download additional images for the above styles.")
             else:
                 styles_to_download = []
             
@@ -418,16 +468,19 @@ class StyleDownloader:
                 logger.info(f"Description: {style.get('description', 'No description')}")
                 logger.info(f"Keywords: {', '.join(style.get('search_keywords', []))}")
                 
+                # Get existing image count
+                existing_count = len(style.get('image_paths', []))
+                
                 # Try to download images using Pexels API
                 images_downloaded = self.download_pexels_images(style)
                 total_images += images_downloaded
                 
-                logger.info(f"Completed downloading {images_downloaded} images for {style['name']}")
+                logger.info(f"Completed downloading {images_downloaded} additional images for {style['name']} (now has {existing_count + images_downloaded} total)")
                 
                 # Small delay between styles
                 time.sleep(1)
             
-            logger.info(f"\nDownload complete! Total images: {total_images}")
+            logger.info(f"\nDownload complete! Total new images: {total_images}")
             
         except Exception as e:
             logger.error(f"Error in main process: {e}")
