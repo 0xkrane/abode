@@ -1,0 +1,169 @@
+{
+    "styles": [
+        {
+            "name": "Scandinavian Minimalism",
+            "description": "This style emphasizes simplicity and functionality, with a neutral color palette and sleek furniture.",
+            "search_keywords": [
+                "Scandinavian",
+                "Minimalist",
+                "Neutral",
+                "Functional",
+                "Nordic"
+            ]
+        },
+        {
+            "name": "Industrial Loft",
+            "description": "Characterized by exposed brick, metal fixtures, and an open floor plan, this style evokes the look of an urban warehouse.",
+            "search_keywords": [
+                "Industrial",
+                "Loft",
+                "Exposed Brick",
+                "Metal",
+                "Urban"
+            ]
+        },
+        {
+            "name": "French Country",
+            "description": "A rustic yet elegant style featuring distressed wooden furniture, soft pastel colors, and vintage accents.",
+            "search_keywords": [
+                "French",
+                "Country",
+                "Rustic",
+                "Vintage",
+                "Pastel"
+            ]
+        },
+        {
+            "name": "Mid-Century Modern",
+            "description": "Known for its clean lines, organic curves, and a mix of natural and man-made materials, this style is a nod to the 1950s and 60s design.",
+            "search_keywords": [
+                "Mid-Century",
+                "Modern",
+                "Retro",
+                "Clean Lines",
+                "Organic"
+            ]
+        },
+        {
+            "name": "Bohemian Eclectic",
+            "description": "A vibrant and diverse style that embraces a mix of colors, textures, and patterns, often with a global influence.",
+            "search_keywords": [
+                "Bohemian",
+                "Eclectic",
+                "Colorful",
+                "Globally Inspired",
+                "Textures"
+            ]
+        },
+        {
+            "name": "Japanese Zen",
+            "description": "Focusing on simplicity, balance, and natural materials, this style creates a serene and harmonious environment.",
+            "search_keywords": [
+                "Japanese",
+                "Zen",
+                "Minimal",
+                "Natural",
+                "Harmony"
+            ]
+        },
+        {
+            "name": "Mediterranean Revival",
+            "description": "Inspired by coastal regions, this style features terracotta tiles, stucco walls, and dark wood furniture to evoke a warm, relaxed atmosphere.",
+            "search_keywords": [
+                "Mediterranean",
+                "Coastal",
+                "Terracotta",
+                "Warm",
+                "Stucco"
+            ]
+        },
+        {
+            "name": "Art Deco Glamour",
+            "description": "This style highlights luxurious materials, bold geometric patterns, and sparkling metallics reminiscent of the 1920s and 30s.",
+            "search_keywords": [
+                "Art Deco",
+                "Glamour",
+                "Geometric",
+                "Metallic",
+                "Luxury"
+            ]
+        },
+        {
+            "name": "Rustic Farmhouse",
+            "description": "Combining comfort and practicality, this style uses natural materials, distressed wood, and vintage accessories to create a cozy, countrified appeal.",
+            "search_keywords": [
+                "Rustic",
+                "Farmhouse",
+                "Cozy",
+                "Wood",
+                "Vintage"
+            ]
+        },
+        {
+            "name": "Victorian Elegance",
+            "description": "Characterized by ornate detailing, rich colors, and intricate patterns, this opulent style reflects the Victorian era's appreciation for luxury.",
+            "search_keywords": [
+                "Victorian",
+                "Ornate",
+                "Elegant",
+                "Intricate",
+                "Opulent"
+            ]
+        },
+        {
+            "name": "Coastal Chic",
+            "description": "Inspired by the beach, this style features light, airy spaces with natural textures and a calming color palette of blues and whites.",
+            "search_keywords": [
+                "Coastal",
+                "Chic",
+                "Beachy",
+                "Airy",
+                "Blue and White"
+            ]
+        },
+        {
+            "name": "Urban Jungle",
+            "description": "This style incorporates abundant greenery and natural elements to create a lush, plant-filled oasis within a modern urban setting.",
+            "search_keywords": [
+                "Urban Jungle",
+                "Plants",
+                "Greenery",
+                "Lush",
+                "Natural"
+            ]
+        },
+        {
+            "name": "Contemporary Elegance",
+            "description": "Featuring sleek, state-of-the-art design with an emphasis on form and comfort, this style is minimal yet luxurious.",
+            "search_keywords": [
+                "Contemporary",
+                "Elegant",
+                "Minimal",
+                "Sleek",
+                "Luxurious"
+            ]
+        },
+        {
+            "name": "Tropical Oasis",
+            "description": "This style embraces vibrant colors, bamboo and rattan furniture, and exotic decor to create a lively, tropical ambiance.",
+            "search_keywords": [
+                "Tropical",
+                "Oasis",
+                "Vibrant",
+                "Exotic",
+                "Bamboo"
+            ]
+        },
+        {
+            "name": "Traditional Indian",
+            "description": "Characterized by rich colors, intricate patterns, and ornate wooden furniture, this style reflects the cultural heritage of India.",
+            "search_keywords": [
+                "Traditional",
+                "Indian",
+                "Rich Colors",
+                "Ornate",
+                "Cultural"
+            ]
+        }
+    ]
+}

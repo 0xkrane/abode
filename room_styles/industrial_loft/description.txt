@@ -1,0 +1,10 @@
+Style: Industrial Loft
+
+Description: Characterized by exposed brick, metal fixtures, and an open floor plan, this style evokes the look of an urban warehouse.
+
+Keywords:
+- Industrial
+- Loft
+- Exposed Brick
+- Metal
+- Urban
