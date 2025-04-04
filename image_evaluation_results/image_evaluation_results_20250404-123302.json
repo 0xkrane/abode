@@ -1,0 +1,98 @@
+{
+  "total_processed": 399,
+  "kept": 195,
+  "removed": 204,
+  "errors": 0,
+  "by_style": {
+    "urban_jungle": {
+      "total": 5,
+      "kept": 5,
+      "removed": 0,
+      "errors": 0
+    },
+    "industrial_loft": {
+      "total": 27,
+      "kept": 27,
+      "removed": 0,
+      "errors": 0
+    },
+    "bohemian_eclectic": {
+      "total": 25,
+      "kept": 25,
+      "removed": 0,
+      "errors": 0
+    },
+    "tropical_oasis": {
+      "total": 3,
+      "kept": 3,
+      "removed": 0,
+      "errors": 0
+    },
+    "mediterranean_revival": {
+      "total": 17,
+      "kept": 17,
+      "removed": 0,
+      "errors": 0
+    },
+    "traditional_indian": {
+      "total": 1,
+      "kept": 1,
+      "removed": 0,
+      "errors": 0
+    },
+    "japanese_zen": {
+      "total": 10,
+      "kept": 10,
+      "removed": 0,
+      "errors": 0
+    },
+    "scandinavian_minimalism": {
+      "total": 33,
+      "kept": 30,
+      "removed": 3,
+      "errors": 0
+    },
+    "coastal_chic": {
+      "total": 42,
+      "kept": 12,
+      "removed": 30,
+      "errors": 0
+    },
+    "contemporary_elegance": {
+      "total": 21,
+      "kept": 11,
+      "removed": 10,
+      "errors": 0
+    },
+    "french_country": {
+      "total": 44,
+      "kept": 5,
+      "removed": 39,
+      "errors": 0
+    },
+    "mid-century_modern": {
+      "total": 44,
+      "kept": 30,
+      "removed": 14,
+      "errors": 0
+    },
+    "victorian_elegance": {
+      "total": 44,
+      "kept": 10,
+      "removed": 34,
+      "errors": 0
+    },
+    "art_deco_glamour": {
+      "total": 39,
+      "kept": 7,
+      "removed": 32,
+      "errors": 0
+    },
+    "rustic_farmhouse": {
+      "total": 44,
+      "kept": 2,
+      "removed": 42,
+      "errors": 0
+    }
+  }
+}
