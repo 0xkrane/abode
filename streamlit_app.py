@@ -80,30 +80,58 @@ def load_styles():
         st.error(f"Error loading styles: {e}")
         return []
 
-def select_random_images(styles, num_images=20):
-    """Select random images from different styles"""
+def select_random_images(styles, num_images=10):
+    """Select random images from different styles with maximum diversity"""
     all_images = []
     style_info = {}  # To track which style each image belongs to
     
-    # Get up to 3 images from each style until we have enough
-    random.shuffle(styles)
+    # First, collect all available images from all styles
+    all_available_images = []
     for style in styles:
-        if len(all_images) >= num_images:
-            break
-            
         style_images = style["image_paths"]
         if style_images:
-            # Shuffle and select up to 3 random images from this style
+            # Shuffle the images within each style
             random.shuffle(style_images)
-            selected = style_images[:min(3, len(style_images))]
+            # Add each image with its style info to our collection
+            for img in style_images:
+                all_available_images.append({
+                    "image_path": img,
+                    "style_name": style["name"],
+                    "description": style.get("description", "")
+                })
+    
+    # Shuffle all images
+    random.shuffle(all_available_images)
+    
+    # Select images, avoiding consecutive images from the same style
+    previous_style = None
+    remaining_images = all_available_images.copy()
+    
+    while len(all_images) < num_images and remaining_images:
+        # If this is the first image, or we're running out of images, just pick the next one
+        if previous_style is None or len(remaining_images) < 3:
+            selected = remaining_images.pop(0)
+        else:
+            # Try to find an image from a different style than the previous one
+            different_style_images = [img for img in remaining_images[:10] if img["style_name"] != previous_style]
             
-            for img in selected:
-                if len(all_images) < num_images:
-                    all_images.append(img)
-                    style_info[img] = {
-                        "name": style["name"],
-                        "description": style.get("description", "")
-                    }
+            if different_style_images:
+                # Pick a random image from a different style
+                selected = random.choice(different_style_images)
+                remaining_images.remove(selected)
+            else:
+                # If no different styles available, just take the next one
+                selected = remaining_images.pop(0)
+        
+        # Add the selected image to our final list
+        all_images.append(selected["image_path"])
+        style_info[selected["image_path"]] = {
+            "name": selected["style_name"],
+            "description": selected["description"]
+        }
+        
+        # Remember this style to avoid consecutive repetition
+        previous_style = selected["style_name"]
     
     return all_images, style_info
 
